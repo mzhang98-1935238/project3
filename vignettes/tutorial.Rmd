@@ -18,3 +18,8 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(project3)
 ```
+
+```{r}
+2 * 2
+```
+
