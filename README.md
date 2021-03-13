@@ -9,10 +9,10 @@ The goal of project3 is to ...
 
 ## Installation
 
-You can install the released version of project3 from [CRAN](https://CRAN.R-project.org) with:
+You can install the project 3 package using the following line:
 
 ``` r
-install.packages("project3")
+devtools::install_github("mzhang98/project3", build_vignette = TRUE, build_opts = c())
 ```
 
 ## Example
