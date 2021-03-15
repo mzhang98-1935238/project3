@@ -25,7 +25,8 @@ my_t.test <- function(x, alternative, mu) {
     stop("specification of alternative hypothesis is unidentifiable")
   }
   se <- sd(x) / sqrt(length(x)) # standard error = sd/sqrt(n)
-  test_stat <- (mean(x) - mu)/se # t value = (mean - mu)/se
+  # t value = (mean - mu)/se
+  test_stat <- (mean(x) - mu)/se
   df <- length(x) - 1 # degree of freedom = sample size - 1
   # calculation of p value given test statistic
   if (alternative == "two.sided") {
@@ -36,6 +37,6 @@ my_t.test <- function(x, alternative, mu) {
     p_val <- pt(-abs(test_stat), df, lower.tail = TRUE)
   }
   # return a list with elements test statistic, df, parameter alternative, and p value
-  list <- c(test_stat, df, alternative, p_val)
+  list <- c(format(round(test_stat, 4), nsmall = 4), df, alternative, signif(p_val, 4))
   return (list)
 }
