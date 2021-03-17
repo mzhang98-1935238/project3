@@ -13,6 +13,8 @@
 #'   \item{alternative}{The value of the parameter alternative.}
 #'   \item{p_val}{The numeric p-value.}
 #'
+#' @importFrom stats pt sd
+#'
 #' @examples
 #' my_t.test(my_gapminder$lifeExp, "two.sided", 60)
 #' my_t.test(my_gapminder$lifeExp, "less", 60)
@@ -32,11 +34,11 @@ my_t.test <- function(x, alternative, mu) {
   if (alternative == "two.sided") {
     p_val <- 2 * pt(-abs(test_stat), df)
   } else if (alternative == "less") {
-    p_val <- pt(-abs(test_stat), df, lower.tail = FALSE)
-  } else {
     p_val <- pt(-abs(test_stat), df, lower.tail = TRUE)
+  } else {
+    p_val <- pt(-abs(test_stat), df, lower.tail = FALSE)
   }
   # return a list with elements test statistic, df, parameter alternative, and p value
-  list <- c(format(round(test_stat, 4), nsmall = 4), df, alternative, signif(p_val, 4))
+  list <- c(test_stat, df, alternative, p_val)
   return (list)
 }

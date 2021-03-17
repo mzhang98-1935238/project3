@@ -9,6 +9,8 @@
 #'   rows for each coefficient (including the Intercept) and columns for the
 #'   estimate, standard error, t value, and \code{Pr(>|t|)}
 #'
+#' @importFrom stats model.frame model.matrix model.response pt
+#'
 #' @examples
 #' my_lm(lifeExp ~ gdpPercap + continent, my_gapminder)
 #'

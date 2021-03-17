@@ -6,6 +6,11 @@
 #'
 #' @return A numeric with the cross-validation error
 #'
+#' @importFrom stats na.omit predict
+#' @importFrom dplyr filter
+#' @importFrom dplyr %>%
+#' @importFrom randomForest randomForest
+#'
 #' @examples
 #' my_rf_cv(2)
 #' my_rf_cv(5)
@@ -13,8 +18,11 @@
 #'
 #' @export
 my_rf_cv <- function(k) {
+  if (is.numeric(k) == FALSE) {
+    stop("input k is non-numeric")
+  }
   # omit NAs in penguins
-  omit_penguins <- na.omit(penguins)
+  omit_penguins <- na.omit(my_penguins)
   # assign observations to folds 1,...,k with equal probability
   fold <- sample(rep(1:k, length = nrow(omit_penguins)))
   data <- cbind(omit_penguins[3:6], fold)
