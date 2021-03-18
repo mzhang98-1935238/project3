@@ -6,6 +6,7 @@
 #' @param cl True class value of your training data.
 #' @param k_nn Integer representing the number of neighbors.
 #' @param k_cv Integer representing the number of folds.
+#' @keywords cross-validation
 #'
 #' @return A list with objects:
 #'   \item{class}{A vector of the predicted class for all observations.}

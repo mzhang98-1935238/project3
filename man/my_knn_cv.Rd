@@ -31,3 +31,4 @@ my_knn_cv(data[, 3:6], data[, 1], 1, 5)
 my_knn_cv(data[, 3:6], data[, 1], 5, 5)
 
 }
+\keyword{cross-validation}

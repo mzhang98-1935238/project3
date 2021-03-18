@@ -5,6 +5,7 @@
 #' @param k Number of folds.
 #'
 #' @return A numeric with the cross-validation error
+#' @keywords cross-validation
 #'
 #' @importFrom stats na.omit predict
 #' @importFrom dplyr filter
