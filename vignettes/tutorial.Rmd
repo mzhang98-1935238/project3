@@ -8,6 +8,28 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<!--- Begin styling code. --->
+<style type="text/css">
+/* Whole document: */
+body{
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 12pt;
+}
+h1.title {
+  font-size: 38px;
+  text-align: center;
+}
+h4.author {
+  font-size: 18px;
+  text-align: center;
+}
+h4.date {
+  font-size: 18px;
+  text-align: center;
+}
+</style>
+<!--- End styling code. --->
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -15,11 +37,112 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r, load-packages, include = FALSE}
 library(project3)
 ```
 
-```{r}
-2 * 2
+##Introduction
+
+Project3 is an R package that contains functions \code{my_t.test}, \code{my_lm}, 
+\code{my_knn_cv}, and \code{my_rf_cv}. \code{my_t.test} performs a one sample t-test. 
+\code{my_lm} fits a linear model. \code{my_knn_cv} implements \code{knn} to perform cross-validation. \code{my_rf_cv} implements \code{randomForest} to perform cross-validation. You can install the Project3 package using the following code:
+```{r eval = FALSE}
+devtools::install_github("mzhang98/project3", build_vignette = TRUE, build_opts = c())
 ```
 
+##Tutorial for \code{my_t.test}
+
+The code below demonstrates tests of $H_0:\mu=60$ with three different alternative hypothesis respectively: $H_a:\mu\neq60$, $H_a:\mu<60$, and $H_a:\mu>60$. The data used for the tests is \code{lifeExp} data from \code{my_gapminder}.
+
+```{r}
+data <- my_gapminder$lifeExp
+# tests with alternative hypothesis specified by "two.sided", "less", and "greater"
+my_t.test(data, "two.sided", 60)
+my_t.test(data, "less", 60)
+my_t.test(data, "greater", 60)
+```
+
+The three one-sample t tests above all have the same t value, -1.6795 (4 significant figures after the decimal place), and the same degree of freedom, 1703. 
+<br />
+The first test is a two-sided t test. The p-value is 0.09322 (4 significant figures after the decimal place). Since the p-value is greater than $\alpha = 0.05$, we cannot reject $H_0:\mu=60$ in favor of $H_a:\mu\neq60$. We have no support for $\mu\neq60$ where $\mu$ is the mean \code{lifeExp} data.
+<br />
+The second test is a one-sided t test with $H_a:\mu<60$. The p-value is 0.004661 (4 significant figures after the decimal place). Since the p-value is less than $\alpha = 0.05$, we reject $H_0:\mu=60$ in favor of $H_a:\mu<60$. There's evidence that $\mu<60$ where $\mu$ is the mean \code{lifeExp} data.
+<br />
+The last test is a one-sided t test with $H_a:\mu>60$. The p-value is 0.9534 (4 significant figures after the decimal place). Since the p-value is greater than $\alpha = 0.05$, we cannot reject $H_0:\mu=60$ in favor of $H_a:\mu>60$. We have no support for $\mu>60$ where $\mu$ is the mean \code{lifeExp} data.
+
+##Tutorial for \code{my_lm}
+
+The code below demonstrates a regression with \code{lifeExp} as the response variable and \code{gdpPercap} and \code{continent} as the explanatory variables.
+
+```{r}
+model <- my_lm(lifeExp ~ gdpPercap + continent, my_gapminder)
+model
+```
+
+The coefficient on \code{gdpPercap} implies that if \code{continent} is held constant, each additional \code{gdpPercap} is associated with an increase of $4.4527e^{-4}$ (4 significant figures after the decimal place) in \code{lifeExp}
+<br />
+The null hypothesis for the hypothesis test associated with \code{gdpPercap} is $gdpPercap=0$.
+The test statistic for \code{gdpPercap} is 18.9493 (4 significant figures after the decimal place), which is larger than the critical values for the 95% (1.96) confidence level. Therefore, we reject the null hypothesis that the association between \code{gdpPercap} and \code{lifeExp} is 0.
+<br />
+The p-value for \code{gdpPercap} is $8.5529e^{-73}$. Since the p-value is smaller than $\alpha = 0.05$, we reject $H_0:gdpPercap=0$ in favor of $H_a:gdpPercap\neq0$. There's an association between \code{gdpPercap} and \code{lifeExp}
+<br />
+```{r}
+X <- model.matrix(lifeExp ~ gdpPercap + continent, my_gapminder)
+fit_val <- X %*% model[, 1]
+ggplot(my_gapminder, aes(x = fit_val, y = lifeExp)) + 
+  geom_point() +
+  labs(title = "Actual vs. Fitted values", x = "Fitted values", y = "Actual values")
+```
+
+Ideally, all the points in the graph should be close to a regressed diagonal line. The dot plot above clearly reflects 4 groups of data points, which is supported by the fact that \code{continent} has 4 categories: Americas, Asia, Europe, and Oceania. If we look into each group of data points, we can see that the points reflect an exponential relation between the fitted and actual values. A good model fit would generate an Actual vs. Fitted plot with points close to a diagonal line scattered randomly above and below. Therefore, this is not a good model fit.
+
+##Tutorial for \code{my_knn_cv}
+
+The code below predicts the output class \code{species} with covariates \code{bill_length_mm}, \code{bill_depth_mm}, \code{flipper_length_mm}, and \code{body_mass_g}.
+
+```{r}
+data <- na.omit(my_penguins)
+data$species <- as.numeric(factor(data$species, levels = c('Adelie', 'Chinstrap', 'Gentoo'), labels = c(1, 2, 3)))
+cv_err <- vector()
+train_err <- vector()
+for (i in 1:10) {
+  model <- my_knn_cv(data[, 3:6], data[, 1], i, 5)
+  cv_err[i] <- as.numeric(model[2])
+  train_err[i] <- as.numeric(model[3])
+}
+result <- cbind(cv_err, train_err)
+result
+```
+
+Based on the training misclassification rates, I would choose the model with $k=1$ as the the training error equals 0. Based on the CV misclassification rates, I would also choose the model with $k=1$ as it generates the smallest error.
+<br />
+Cross-validation is a technique for assessing how the statistical analysis generalizes to an independent dataset. Cross-validation first divide the data into training and test data. It predicts the test data based on the training data. CV misclassification error occurs when the predicted test data does not match the actual test data. Since models may overfit training data, cross-validation provides a check its performance on the test data, which is useful for scientists and mathematicians.
+
+##Tutorial for \code{my_rf_cv}
+
+The code below predict \code{body_mass_g} using covariates \code{bill_length_mm}, \code{bill_depth_mm}, and \code{flipper_length_mm}.
+
+```{r}
+rf <- vector()
+result <- data.frame()
+num <- 0
+for (k in c(2, 5, 10)) {
+  for (i in 1:30) {
+    result[num * 30 + i, 1] <- k
+    result[num * 30 + i, 2] <- my_rf_cv(k)
+  }
+  num <- num + 1
+}
+colnames(result) <- c("k", "cv_err")
+ggplot(result, aes(x = k, y = cv_err, group = k)) + 
+  geom_boxplot() +
+  labs(title = "CV estimated MSE with k = 2, 5, 10", x = "number of folds (k)", y = "CV estimated MSE")
+avg <- c(mean(result[1:30, 2]), mean(result[31:60, 2]), mean(result[61:90, 2]))
+sd <- c(sd(result[1:30, 2]), sd(result[31:60, 2]), sd(result[61:90, 2]))
+table <- cbind(avg, sd)
+colnames(table) <- c("mean", "standard deviation")
+rownames(table) <- c("k = 2", "k = 5", "k = 10")
+table
+```
+
+From the boxplot, we can see that the variation among \code{cv_err} decreases as \code{k} increases. This is reflected by the decreasing size of the boxes in the boxplot. The mean \code{cv_err} slightly decreases as \code{k} increases. This is the case because as \code{k} increases, the number of times \code{my_rf_cv} perform Random Forest Cross-Validation increases. More repetitions of generating cross-validation error would lead to results that are more centered and less varied.
