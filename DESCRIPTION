@@ -23,4 +23,8 @@ VignetteBuilder: knitr
 Imports: 
     tibble,
     dplyr,
-    randomForest
+    randomForest,
+    palmerpenguins,
+    qpdf,
+    class,
+    ggplot2
